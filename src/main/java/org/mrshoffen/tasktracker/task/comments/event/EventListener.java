@@ -25,14 +25,6 @@ public class EventListener {
                 .block();
     }
 
-    @KafkaListener(topics = DeskDeletedEvent.TOPIC)
-    public void handleDeskDeletedEvent(DeskDeletedEvent event) {
-        log.info("Received event in topic {} - {}", DeskDeletedEvent.TOPIC, event);
-        commentsService
-                .deleteAllCommentsInDesk(event.getWorkspaceId(), event.getDeskId())
-                .block();
-    }
-
     @KafkaListener(topics = TaskDeletedEvent.TOPIC)
     public void handleTaskDeletedEvent(TaskDeletedEvent event) {
         log.info("Received event in topic {} - {}", TaskDeletedEvent.TOPIC, event);

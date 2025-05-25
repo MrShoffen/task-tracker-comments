@@ -11,8 +11,6 @@ public interface TaskCommentsRepository extends ReactiveCrudRepository<TaskComme
 
     Mono<Void> deleteAllByWorkspaceId(UUID workspaceId);
 
-    Mono<Void> deleteAllByWorkspaceIdAndDeskId(UUID workspaceId, UUID deskId);
-
     Flux<TaskComment> findAllByWorkspaceIdAndTaskId(UUID workspaceId, UUID taskId);
 
     Mono<TaskComment> findByWorkspaceIdAndId(UUID workspaceId, UUID commentId);

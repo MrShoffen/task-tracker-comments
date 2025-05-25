@@ -42,11 +42,6 @@ public class TaskCommentsService {
                 .deleteAllByWorkspaceId(workspaceId);
     }
 
-    public Mono<Void> deleteAllCommentsInDesk(UUID workspaceId, UUID deskId) {
-        return taskCommentsRepository
-                .deleteAllByWorkspaceIdAndDeskId(workspaceId, deskId);
-    }
-
     public Mono<Void> deleteAllCommentsInTask(UUID workspaceId, UUID taskId) {
         return taskCommentsRepository
                 .deleteAllByWorkspaceIdAndTaskId(workspaceId,  taskId);
