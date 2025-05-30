@@ -3,6 +3,7 @@ package org.mrshoffen.tasktracker.task.comments.controller;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.mrshoffen.tasktracker.commons.web.dto.TaskCommentResponseDto;
+import org.mrshoffen.tasktracker.commons.web.dto.TaskCommentsCountDto;
 import org.mrshoffen.tasktracker.task.comments.service.TaskCommentsService;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -23,6 +24,12 @@ public class AggregationTaskCommentsController {
     Flux<TaskCommentResponseDto> getAllCommentsInWorkspace(@PathVariable("workspaceId") UUID workspaceId) {
         return null;
 
+    }
+
+    @GetMapping("/{workspaceId}/comments-count")
+    Flux<TaskCommentsCountDto> getCommentsCount(@PathVariable("workspaceId") UUID workspaceId) {
+        return taskCommentsService
+                .getCommentsCount(workspaceId);
     }
 
 

@@ -2,7 +2,9 @@ package org.mrshoffen.tasktracker.task.comments.service;
 
 import lombok.RequiredArgsConstructor;
 import org.mrshoffen.tasktracker.commons.web.dto.TaskCommentResponseDto;
+import org.mrshoffen.tasktracker.commons.web.dto.TaskCommentsCountDto;
 import org.mrshoffen.tasktracker.commons.web.exception.EntityNotFoundException;
+import org.mrshoffen.tasktracker.task.comments.event.CommentEventPublisher;
 import org.mrshoffen.tasktracker.task.comments.repository.TaskCommentsRepository;
 import org.mrshoffen.tasktracker.task.comments.mapper.TaskCommentsMapper;
 import org.mrshoffen.tasktracker.task.comments.model.dto.CommentCreateDto;
@@ -21,19 +23,21 @@ public class TaskCommentsService {
 
     private final TaskCommentsRepository taskCommentsRepository;
 
-    public Mono<TaskCommentResponseDto> createComment(CommentCreateDto createDto, UUID userId, UUID workspaceId,
-                                                      UUID deskId, UUID taskId) {
+    private final CommentEventPublisher eventPublisher;
+
+    public Mono<TaskCommentResponseDto> createComment(CommentCreateDto createDto, UUID userId, UUID workspaceId, UUID taskId) {
         TaskComment taskComment = taskCommentsMapper
-                .toEntity(createDto, userId, workspaceId, deskId, taskId);
+                .toEntity(createDto, userId, workspaceId, taskId);
 
         return taskCommentsRepository
                 .save(taskComment)
-                .map(taskCommentsMapper::toDto);
+                .map(taskCommentsMapper::toDto)
+                .doOnSuccess(eventPublisher::publishCommentCreatedEvent);
     }
 
-    public Flux<TaskCommentResponseDto> getAllComments(UUID workspaceId, UUID taskId) {
+    public Flux<TaskCommentResponseDto> getCommentsWithOffsetAndLimit(UUID workspaceId, UUID taskId, Long offset, Long limit) {
         return taskCommentsRepository
-                .findAllByWorkspaceIdAndTaskId(workspaceId, taskId)
+                .findAllByTaskIdWithOffsetAndLimit(workspaceId, taskId, offset, limit)
                 .map(taskCommentsMapper::toDto);
     }
 
@@ -42,19 +46,15 @@ public class TaskCommentsService {
                 .deleteAllByWorkspaceId(workspaceId);
     }
 
-    public Mono<Void> deleteAllCommentsInDesk(UUID workspaceId, UUID deskId) {
-        return taskCommentsRepository
-                .deleteAllByWorkspaceIdAndDeskId(workspaceId, deskId);
-    }
-
     public Mono<Void> deleteAllCommentsInTask(UUID workspaceId, UUID taskId) {
         return taskCommentsRepository
-                .deleteAllByWorkspaceIdAndTaskId(workspaceId,  taskId);
+                .deleteAllByWorkspaceIdAndTaskId(workspaceId, taskId);
     }
 
-    public Mono<Void> deleteCommentById(UUID workspaceId, UUID commentId) {
+    public Mono<Void> deleteCommentById(UUID workspaceId, UUID commentId, UUID deletedBy) {
         return taskCommentsRepository
                 .findByWorkspaceIdAndId(workspaceId, commentId)
+                .doOnSuccess(comment -> eventPublisher.publishCommentDeletedEvent(comment, deletedBy))
                 .switchIfEmpty(
                         Mono.error(new EntityNotFoundException(
                                 "Комментарий с id %s не найдена в данном пространстве"
@@ -62,5 +62,10 @@ public class TaskCommentsService {
                         ))
                 )
                 .flatMap(taskCommentsRepository::delete);
+    }
+
+    public Flux<TaskCommentsCountDto> getCommentsCount(UUID workspaceId) {
+        return taskCommentsRepository
+                .countCommentsByTaskIdForWorkspace(workspaceId);
     }
 }

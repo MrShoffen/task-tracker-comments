@@ -13,5 +13,5 @@ public interface TaskCommentsMapper {
 
     TaskCommentResponseDto toDto(TaskComment taskComment);
 
-    TaskComment toEntity(CommentCreateDto dto, UUID userId, UUID workspaceId, UUID deskId, UUID taskId);
+    TaskComment toEntity(CommentCreateDto dto, UUID userId, UUID workspaceId,  UUID taskId);
 }
