@@ -20,12 +20,6 @@ public class AggregationTaskCommentsController {
 
     private final TaskCommentsService taskCommentsService;
 
-    @GetMapping("/{workspaceId}/comments")
-    Flux<TaskCommentResponseDto> getAllCommentsInWorkspace(@PathVariable("workspaceId") UUID workspaceId) {
-        return null;
-
-    }
-
     @GetMapping("/{workspaceId}/comments-count")
     Flux<TaskCommentsCountDto> getCommentsCount(@PathVariable("workspaceId") UUID workspaceId) {
         return taskCommentsService

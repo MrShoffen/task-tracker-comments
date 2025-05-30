@@ -11,3 +11,7 @@ CREATE TABLE IF NOT EXISTS task_comments
     workspace_id UUID          NOT NULL,
     task_id      UUID          NOT NULL
 );
+
+CREATE INDEX IF NOT EXISTS comments_workspace_id_id_idx ON task_comments (task_id, workspace_id);
+
+CREATE INDEX IF NOT EXISTS comments_workspace_id_idx ON task_comments (workspace_id);
